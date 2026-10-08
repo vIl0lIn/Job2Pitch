@@ -338,7 +338,6 @@ function HeroSection() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
     let animId: number;
     let W = 0, H = 0;
     let dotsT = 0;
@@ -368,9 +367,10 @@ function HeroSection() {
     }
 
     function resize() {
-      const hero = canvas.parentElement!;
-      W = canvas.width = hero.offsetWidth;
-      H = canvas.height = hero.offsetHeight;
+      const hero = canvas!.parentElement;
+      if (!hero) return;
+      W = canvas!.width = hero.offsetWidth;
+      H = canvas!.height = hero.offsetHeight;
       initDrops();
     }
 
@@ -379,7 +379,7 @@ function HeroSection() {
     }
 
     function draw() {
-      ctx.clearRect(0, 0, W, H);
+      ctx!.clearRect(0, 0, W, H);
       const dark = isDark();
       const sx = W / (COLS_DOT - 1);
       const sy = H / (ROWS_DOT - 1);
@@ -394,23 +394,22 @@ function HeroSection() {
           const x = col * sx, y = row * sy;
           const accent = wave > 0.75;
           const alpha = 0.06 + Math.abs(wave) * 0.13;
-          ctx.beginPath();
-          ctx.arc(x, y, Math.max(0.3, r), 0, Math.PI * 2);
-          ctx.fillStyle = accent
+          ctx!.beginPath();
+          ctx!.arc(x, y, Math.max(0.3, r), 0, Math.PI * 2);
+          ctx!.fillStyle = accent
             ? `rgba(232,53,42,${alpha * 1.6})`
             : dark ? `rgba(240,237,232,${alpha})` : `rgba(13,13,13,${alpha})`;
-          ctx.fill();
+          ctx!.fill();
         }
       }
 
       // Rain layer
-      ctx.font = `700 12px 'Barlow Condensed', sans-serif`;
       drops.forEach(d => {
-        ctx.font = `700 ${d.size}px 'Barlow Condensed', sans-serif`;
-        ctx.fillStyle = d.accent
+        ctx!.font = `700 ${d.size}px 'Barlow Condensed', sans-serif`;
+        ctx!.fillStyle = d.accent
           ? `rgba(232,53,42,${d.alpha * 1.8})`
           : dark ? `rgba(240,237,232,${d.alpha})` : `rgba(13,13,13,${d.alpha})`;
-        ctx.fillText(d.word, d.x, d.y);
+        ctx!.fillText(d.word, d.x, d.y);
         d.y += d.speed;
         if (d.y > H + 40) {
           d.y = -40;
@@ -427,8 +426,9 @@ function HeroSection() {
     resize();
     draw();
 
+    const hero = canvas.parentElement;
     const ro = new ResizeObserver(resize);
-    ro.observe(canvas.parentElement!);
+    if (hero) ro.observe(hero);
 
     return () => {
       cancelAnimationFrame(animId);
